@@ -1,5 +1,6 @@
 from django.db import models
 # from django.contrib.auth.hashers import make_password
+import uuid
 
 # Create your models here.
 class ImageCarousel(models.Model):
@@ -89,7 +90,15 @@ class UserModel(models.Model):
     #     # Hash the password before saving
     #     self.password = make_password(self.password)
     #     super(UserModel, self).save(*args, **kwargs)
-    
+
+class CustomToken(models.Model):
+    key = models.CharField(max_length=40, primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.OneToOneField(UserModel, related_name='auth_token', on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.key
+
 class AddToCart(models.Model):
     user_model = models.ForeignKey(UserModel, on_delete=models.CASCADE)
     cake = models.ForeignKey(Cake, on_delete=models.CASCADE)
