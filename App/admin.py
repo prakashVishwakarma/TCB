@@ -1,7 +1,7 @@
 from django.contrib import admin
 from App.models import UserModel, ImageCarousel, Category, CakeImage, CakeFlavour, SpongeType, FinishType, KindlyNote, \
     DeliverySpecifics, CakeCareGuidelines, ProductDescription, Cake, CakeCategory, TrendingNow, OurBestsellers, \
-    ExploreMoreWithUs, ClientsSayAboutUs, AddToCart, Addresses, CakeOrderHistory, Personalization
+    ExploreMoreWithUs, ClientsSayAboutUs, AddToCart, Addresses, CakeOrderHistory, Personalization, CustomToken
 
 
 # Register your models here.
@@ -13,7 +13,11 @@ from App.models import UserModel, ImageCarousel, Category, CakeImage, CakeFlavou
 
 @admin.register(UserModel)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ['id','full_name','email','password','mobile_number']
+    list_display = ['user', 'mobile_number']
+
+@admin.register(CustomToken)
+class CustomTokenAdmin(admin.ModelAdmin):
+    list_display = ['key','user']
 
 @admin.register(ImageCarousel)
 class ImageCarouselAdmin(admin.ModelAdmin):

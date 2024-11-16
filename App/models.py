@@ -1,6 +1,7 @@
 from django.db import models
 # from django.contrib.auth.hashers import make_password
 import uuid
+from django.contrib.auth.models import User
 
 # Create your models here.
 class ImageCarousel(models.Model):
@@ -81,10 +82,10 @@ class ClientsSayAboutUs(models.Model):
     client_name = models.CharField(max_length=255)
 
 class UserModel(models.Model):
-    full_name = models.CharField(max_length=255)
-    email = models.EmailField(max_length=255, unique=True)
-    password = models.CharField(max_length=255)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     mobile_number = models.CharField(max_length=15, blank=True, null=True)
+    # created_at = models.DateTimeField(auto_now_add=True)
+    # updated_at = models.DateTimeField(auto_now=True)
 
     # def save(self, *args, **kwargs):
     #     # Hash the password before saving
@@ -93,11 +94,9 @@ class UserModel(models.Model):
 
 class CustomToken(models.Model):
     key = models.CharField(max_length=40, primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.OneToOneField(UserModel, related_name='auth_token', on_delete=models.CASCADE)
-    created = models.DateTimeField(auto_now_add=True)
+    user = models.OneToOneField(UserModel, on_delete=models.CASCADE)
+    # created = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return self.key
 
 class AddToCart(models.Model):
     user_model = models.ForeignKey(UserModel, on_delete=models.CASCADE)
