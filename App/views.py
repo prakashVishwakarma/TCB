@@ -1,3 +1,5 @@
+from logging import exception
+
 from django.contrib.auth import authenticate
 from django.core.serializers import serialize
 from django.http import JsonResponse
@@ -16,11 +18,15 @@ from rest_framework.permissions import IsAuthenticated
 
 class SignupView(APIView):
     def post(self, request):
-        serializer = SignupSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse({"message": "User created successfully"}, status=status.HTTP_201_CREATED)
-        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            serializer = SignupSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return JsonResponse({"message": "User created successfully"}, status=status.HTTP_201_CREATED)
+            return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
 
 class GetAllUsers(generics.ListAPIView):
         queryset = UserModel.objects.all()

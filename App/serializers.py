@@ -14,6 +14,20 @@ class SignupSerializer(serializers.ModelSerializer):
         model = UserModel
         fields = ('username', 'password', 'email', 'mobile_number')
 
+    def validate_username(self, value):
+        # Check if the username already exists
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError( {
+                "message": "This username is already taken. Please choose a different one."
+            })
+
+        # Add any additional username validation here
+        # For example, restrict certain characters or minimum length
+        if len(value) < 3:
+            raise serializers.ValidationError("Username must be at least 3 characters long.")
+
+        return value
+
     def create(self, validated_data):
         user = User.objects.create_user(
             username=validated_data['username'],
