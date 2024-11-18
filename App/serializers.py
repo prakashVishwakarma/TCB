@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import UserModel
+from .models import UserModel, ImageCarousel
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 
@@ -41,6 +41,16 @@ class SignupSerializer(serializers.ModelSerializer):
         return user
 
 class GetUserSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    email = serializers.EmailField(source='user.email', read_only=True)
+    # password = serializers.CharField(source='user.password',read_only=True)
+
     class Meta:
         model = UserModel
-        fields = ['full_name', 'email', 'password', 'mobile_number']
+        fields = ['id','username', 'email', 'mobile_number']
+
+
+class ImageCarouselSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ImageCarousel
+        fields = '__all__'

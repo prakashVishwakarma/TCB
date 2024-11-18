@@ -5,13 +5,14 @@ from django.core.serializers import serialize
 from django.http import JsonResponse
 from django.shortcuts import render
 from rest_framework.views import APIView
-from rest_framework import status
+from rest_framework import status, viewsets
 
 from App.models import CustomToken, UserModel
-from App.serializers import GetUserSerializer, SignupSerializer
+from App.serializers import GetUserSerializer, SignupSerializer, ImageCarouselSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken  # Import for token generation
 
 
 # Create your views here.
@@ -21,11 +22,22 @@ class SignupView(APIView):
         try:
             serializer = SignupSerializer(data=request.data)
             if serializer.is_valid():
-                serializer.save()
-                return JsonResponse({"message": "User created successfully"}, status=status.HTTP_201_CREATED)
+                user = serializer.save()  # Save new user if data is valid
+
+                # Generate token for the new user
+                token, created = Token.objects.get_or_create(user=user)
+
+                return JsonResponse({
+                    "message": "User created successfully",
+                    "token": token.key
+                }, status=status.HTTP_201_CREATED)
+
             return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         except Exception as e:
             print(f"An error occurred: {e}")
+            return JsonResponse({"error": "Something went wrong. Please try again later."},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class GetAllUsers(generics.ListAPIView):
@@ -36,4 +48,23 @@ class GetAllUsers(generics.ListAPIView):
         def get(self, request, *args, **kwargs):
             # Manually instantiate the serializer with queryset data
             serializer = GetUserSerializer(self.get_queryset(), many=True)
-            return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False)
+            return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False , content_type='application/json')
+
+
+class ImageCarouselViewSet(viewsets.ViewSet):
+    def create(self, request):
+        serializer = ImageCarouselSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            response_data = {
+                'status': 'ok',
+                'message': 'Image carousel entry created successfully.',
+            }
+            return JsonResponse(response_data, status=status.HTTP_201_CREATED)
+        else:
+            response_data = {
+                'status': 'fail',
+                'message': 'Please provide a valid cake image URL.'
+            }
+            return JsonResponse(response_data, status=status.HTTP_400_BAD_REQUEST)
+
