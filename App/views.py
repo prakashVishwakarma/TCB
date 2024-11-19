@@ -2,7 +2,8 @@ from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework import status, viewsets
 from App.models import UserModel, ImageCarousel, Category
-from App.serializers import GetUserSerializer, SignupSerializer, ImageCarouselSerializer, CreateCategorySerializer
+from App.serializers import GetUserSerializer, SignupSerializer, ImageCarouselSerializer, CreateCategorySerializer, \
+    GetCategorySerializer, CategorySerializer
 from rest_framework.authtoken.models import Token
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
@@ -145,3 +146,20 @@ class CreateCategory(APIView):
             )
         except Exception as e:
             JsonResponse(e, status=status.HTTP_404_NOT_FOUND)
+
+class GetAllCategory(APIView):
+    def get(self, request):
+        # Fetch all Category objects
+        categories = Category.objects.all()
+
+        # Serialize the data
+        serializer = CategorySerializer(categories, many=True)
+
+        # Validate serialization (typically not necessary for GET)
+        if serializer.data:  # Ensure serialized data is not empty
+            return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False)
+        else:
+            return JsonResponse(
+                {"error": "No categories found or serialization failed."},
+                status=status.HTTP_204_NO_CONTENT
+            )

@@ -59,3 +59,8 @@ class CreateCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ['cake_image','category_name']
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'cake_image', 'category_name']
