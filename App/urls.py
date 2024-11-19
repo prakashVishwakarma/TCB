@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from App.views import GetAllUsers, SignupView, ImageCarouselViewSet, ImageCarouselListView
+from App.views import GetAllUsers, SignupView, ImageCarouselViewSet, ImageCarouselListView, SoftDeleteImageCarousel
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,5 +25,6 @@ urlpatterns = [
     path('getallusers/', GetAllUsers.as_view(), name='GetAllUsers'),
     path('postcaroucel/', ImageCarouselViewSet.as_view({'post': 'create'}), name='ImageCarouselViewSet'),
     path('getallcaroucel/', ImageCarouselListView.as_view(), name='ImageCarouselListView'),
+    path('image-carousel/delete/<int:pk>/', SoftDeleteImageCarousel.as_view(), name='soft-delete-image-carousel'),
 
 ]

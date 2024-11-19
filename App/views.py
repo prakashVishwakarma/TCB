@@ -66,3 +66,39 @@ class ImageCarouselListView(APIView):
         images = ImageCarousel.objects.filter(is_deleted = False)  # Retrieve all image carousel entries
         serializer = ImageCarouselSerializer(images, many=True)
         return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False)
+
+class SoftDeleteImageCarousel(APIView):
+    def delete(self, request, pk):
+        try:
+
+            # Fetch the object by primary key (id)
+            image_carousel = ImageCarousel.objects.get(pk=pk)
+
+            # Check if the object is already soft-deleted
+            if image_carousel.is_deleted:
+                return JsonResponse(
+                    {"error": "ImageCarousel is already deleted."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            serializer = ImageCarouselSerializer(
+                image_carousel,
+                data={"is_deleted": True},
+                partial=True  # Allow partial updates
+            )
+
+            if serializer.is_valid():
+                serializer.save()  # Save the changes
+                return JsonResponse(
+                    {"message":"deleted successfully"},  # Return the serialized data
+                    status=status.HTTP_204_NO_CONTENT
+                )
+            return JsonResponse(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return JsonResponse(
+                {"error": e},
+                status=status.HTTP_404_NOT_FOUND
+            )
