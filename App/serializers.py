@@ -58,4 +58,4 @@ class ImageCarouselSerializer(serializers.ModelSerializer):
 class ImageCarouselSerializer(serializers.ModelSerializer):
     class Meta:
         model = ImageCarousel
-        fields = ['id', 'cake_image']
+        fields = ['cake_image']

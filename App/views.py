@@ -67,6 +67,34 @@ class ImageCarouselListView(APIView):
         serializer = ImageCarouselSerializer(images, many=True)
         return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False)
 
+class ImageCarouselPatchView(APIView):
+    def patch(self, request, pk):
+        try:
+            # Fetch the object by primary key (id)
+            image_carousel = ImageCarousel.objects.get(pk=pk)
+
+            # Use the serializer to validate and update the data
+            serializer = ImageCarouselSerializer(
+                image_carousel,
+                data=request.data,
+                partial=True  # Allow partial updates
+            )
+            if serializer.is_valid():
+                serializer.save()  # Save the changes
+                return JsonResponse(
+                    serializer.data,  # Return the updated object
+                    status=status.HTTP_200_OK
+                )
+            return JsonResponse(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except ImageCarousel.DoesNotExist:
+            return JsonResponse(
+                {"error": "ImageCarousel not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
 class SoftDeleteImageCarousel(APIView):
     def delete(self, request, pk):
         try:
