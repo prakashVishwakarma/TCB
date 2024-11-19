@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import UserModel, ImageCarousel
+from .models import UserModel, ImageCarousel, Category
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 
@@ -55,7 +55,7 @@ class ImageCarouselSerializer(serializers.ModelSerializer):
         model = ImageCarousel
         fields =  ['id', 'cake_image']
 
-class ImageCarouselSerializer(serializers.ModelSerializer):
+class CreateCategorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = ImageCarousel
-        fields = ['cake_image']
+        model = Category
+        fields = ['cake_image','category_name']

@@ -1,8 +1,8 @@
 from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework import status, viewsets
-from App.models import UserModel, ImageCarousel
-from App.serializers import GetUserSerializer, SignupSerializer, ImageCarouselSerializer
+from App.models import UserModel, ImageCarousel, Category
+from App.serializers import GetUserSerializer, SignupSerializer, ImageCarouselSerializer, CreateCategorySerializer
 from rest_framework.authtoken.models import Token
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
@@ -130,3 +130,18 @@ class SoftDeleteImageCarousel(APIView):
                 {"error": e},
                 status=status.HTTP_404_NOT_FOUND
             )
+
+class CreateCategory(APIView):
+    def post(self,request):
+        try:
+            serializer = CreateCategorySerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return JsonResponse({"message":"Category created successfully"},status =status.HTTP_201_CREATED )
+
+            return JsonResponse(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            JsonResponse(e, status=status.HTTP_404_NOT_FOUND)
