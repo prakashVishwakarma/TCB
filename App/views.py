@@ -1,19 +1,11 @@
-from logging import exception
-
-from django.contrib.auth import authenticate
-from django.core.serializers import serialize
 from django.http import JsonResponse
-from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework import status, viewsets
-
-from App.models import CustomToken, UserModel
+from App.models import UserModel, ImageCarousel
 from App.serializers import GetUserSerializer, SignupSerializer, ImageCarouselSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_simplejwt.tokens import RefreshToken  # Import for token generation
-
 
 # Create your views here.
 
@@ -68,3 +60,9 @@ class ImageCarouselViewSet(viewsets.ViewSet):
             }
             return JsonResponse(response_data, status=status.HTTP_400_BAD_REQUEST)
 
+
+class ImageCarouselListView(APIView):
+    def get(self, request):
+        images = ImageCarousel.objects.filter(is_deleted = False)  # Retrieve all image carousel entries
+        serializer = ImageCarouselSerializer(images, many=True)
+        return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False)

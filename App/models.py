@@ -4,8 +4,12 @@ import uuid
 from django.contrib.auth.models import User
 
 # Create your models here.
+
 class ImageCarousel(models.Model):
     cake_image = models.URLField(max_length=500)
+    is_deleted = models.BooleanField(default=False)
+    # created_at = models.DateTimeField(auto_now_add=True)
+    # updated_at = models.DateTimeField(auto_now=True)
 
 # one-to-many relationship - start
 
@@ -82,7 +86,7 @@ class ClientsSayAboutUs(models.Model):
     client_name = models.CharField(max_length=255)
 
 class UserModel(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     mobile_number = models.CharField(max_length=15, blank=True, null=True)
     # created_at = models.DateTimeField(auto_now_add=True)
     # updated_at = models.DateTimeField(auto_now=True)
@@ -91,12 +95,6 @@ class UserModel(models.Model):
     #     # Hash the password before saving
     #     self.password = make_password(self.password)
     #     super(UserModel, self).save(*args, **kwargs)
-
-class CustomToken(models.Model):
-    key = models.CharField(max_length=40, primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.OneToOneField(UserModel, on_delete=models.CASCADE)
-    # created = models.DateTimeField(auto_now_add=True)
-
 
 class AddToCart(models.Model):
     user_model = models.ForeignKey(UserModel, on_delete=models.CASCADE)

@@ -53,4 +53,4 @@ class GetUserSerializer(serializers.ModelSerializer):
 class ImageCarouselSerializer(serializers.ModelSerializer):
     class Meta:
         model = ImageCarousel
-        fields = '__all__'
+        fields =  ['id', 'cake_image']

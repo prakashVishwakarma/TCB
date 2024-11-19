@@ -17,12 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from App.views import GetAllUsers, SignupView, ImageCarouselViewSet
+from App.views import GetAllUsers, SignupView, ImageCarouselViewSet, ImageCarouselListView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('signup/', SignupView.as_view(), name='SignUpView'),
     path('getallusers/', GetAllUsers.as_view(), name='GetAllUsers'),
     path('postcaroucel/', ImageCarouselViewSet.as_view({'post': 'create'}), name='ImageCarouselViewSet'),
+    path('getallcaroucel/', ImageCarouselListView.as_view(), name='ImageCarouselListView'),
 
 ]
