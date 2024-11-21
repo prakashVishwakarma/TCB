@@ -16,7 +16,8 @@ class ImageCarousel(models.Model):
 class Category(models.Model):
     cake_image = models.URLField(max_length=500)
     category_name = models.CharField(max_length=255)
-    
+    is_deleted = models.BooleanField(default=False)
+
 class CakeImage(models.Model):
     cake_image = models.URLField(max_length=500)
 

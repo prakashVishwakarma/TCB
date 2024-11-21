@@ -22,7 +22,7 @@ class ImageCarouselAdmin(admin.ModelAdmin):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['id','cake_image','category_name']
+    list_display = ['id','cake_image','category_name','is_deleted']
 
 @admin.register(CakeImage)
 class CakeImageAdmin(admin.ModelAdmin):

@@ -58,7 +58,7 @@ class ImageCarouselSerializer(serializers.ModelSerializer):
 class CreateCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['cake_image','category_name']
+        fields = ['cake_image','category_name','is_deleted']
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:

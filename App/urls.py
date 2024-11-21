@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path
 
 from App.views import GetAllUsers, SignupView, ImageCarouselViewSet, ImageCarouselListView, SoftDeleteImageCarousel, \
-    ImageCarouselPatchView, CreateCategory, GetAllCategory
+    ImageCarouselPatchView, CreateCategory, GetAllCategory, UpdateCategory, DeleteCategory
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,5 +30,7 @@ urlpatterns = [
     path('image-carousel/update/<int:pk>/', ImageCarouselPatchView.as_view(), name='ImageCarouselPatchViewel'),
     path('create-category/', CreateCategory.as_view(), name='CreateCategory'),
     path('get-all-category/', GetAllCategory.as_view(), name='GetAllCategory'),
+    path('update-category/<int:pk>/', UpdateCategory.as_view(), name='UpdateCategory'),
+    path('delete-category/<int:pk>/', DeleteCategory.as_view(), name='DeleteCategory'),
 
 ]
