@@ -1,5 +1,6 @@
 from functools import partial
 
+from django.contrib.auth import authenticate
 from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework import status, viewsets
@@ -226,4 +227,35 @@ class DeleteCategory(APIView):
             return JsonResponse(
                 {"error": "Something went wrong."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class UserLoginView(APIView):
+    """
+    API for logging in a user.
+    """
+
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        if not username or not password:
+            return JsonResponse(
+                {"error": "Username and password are required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Authenticate the user
+        user = authenticate(username=username, password=password)
+
+        if user is not None:
+            # Get or create token
+            token, created = Token.objects.get_or_create(user=user)
+            return JsonResponse(
+                {"token": token.key, "message": "Login successful."},
+                status=status.HTTP_200_OK
+            )
+        else:
+            return JsonResponse(
+                {"error": "Invalid credentials."},
+                status=status.HTTP_401_UNAUTHORIZED
             )
