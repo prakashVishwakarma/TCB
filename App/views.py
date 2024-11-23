@@ -1,12 +1,15 @@
+import json
+import random
 from functools import partial
 
 from django.contrib.auth import authenticate
+from django.core import cache
 from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework import status, viewsets
-from App.models import UserModel, ImageCarousel, Category
+from App.models import UserModel, ImageCarousel, Category, Cake
 from App.serializers import GetUserSerializer, SignupSerializer, ImageCarouselSerializer, CreateCategorySerializer, \
-    CategorySerializer
+    CategorySerializer, ContactNumberSerializer, CakeSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
@@ -259,3 +262,120 @@ class UserLoginView(APIView):
                 {"error": "Invalid credentials."},
                 status=status.HTTP_401_UNAUTHORIZED
             )
+
+# class ForgotPasswordAPIView(APIView):
+#     """
+#     API to request a password reset using a contact number.
+#     """
+#
+#     def post(self, request):
+#         try:
+#
+#             contact_number = request.data.get('contact_number')
+#             data = json.loads(contact_number)
+#             if not contact_number:
+#                 return JsonResponse({"error": "Contact number is required."}, status=status.HTTP_400_BAD_REQUEST)
+#
+#             try:
+#                 user = UserModel.objects.get(mobile_number=contact_number)
+#             except UserModel.DoesNotExist:
+#                 return JsonResponse({"error": "No user with this contact number exists."}, status=status.HTTP_404_NOT_FOUND)
+#
+#             serializer = ContactNumberSerializer(data={"data":data})
+#             if serializer.is_valid():
+#
+#                 # Generate a 6-digit OTP
+#                 otp = random.randint(100000, 999999)
+#                 print('####################################',otp,contact_number, serializer.data)
+#
+#                 # Store OTP in cache with a timeout (e.g., 5 minutes)
+#                 cache.set(f"reset_password_otp_{contact_number}", otp, timeout=300)
+#
+#                 # Simulate sending OTP (replace this with an SMS service)
+#                 print(f"OTP for {contact_number}: {otp}")
+#
+#                 return JsonResponse(
+#                     {"message": "OTP sent to the provided contact number."},
+#                     status=status.HTTP_200_OK
+#                 )
+#             else:
+#                 return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#         except Exception as e:
+#
+#             return JsonResponse(
+#                 {"message": e},
+#                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
+#             )
+
+# class ResetPasswordWithOTPAPIView(APIView):
+#     """
+#     API to reset the password after verifying the OTP.
+#     """
+#
+#     def post(self, request):
+#         contact_number = request.data.get('contact_number')
+#         otp = request.data.get('otp')
+#         new_password = request.data.get('password')
+#
+#         if not contact_number or not otp or not new_password:
+#             return JsonResponse(
+#                 {"error": "Contact number, OTP, and new password are required."},
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+#
+#         # Retrieve OTP from cache
+#         cached_otp = cache.get(f"reset_password_otp_{contact_number}")
+#
+#         if not cached_otp or str(cached_otp) != str(otp):
+#             return JsonResponse({"error": "Invalid or expired OTP."}, status=status.HTTP_400_BAD_REQUEST)
+#
+#         try:
+#             user = UserModel.objects.get(usermodel__mobile_number=contact_number)
+#         except UserModel.DoesNotExist:
+#             return JsonResponse({"error": "No user with this contact number exists."}, status=status.HTTP_404_NOT_FOUND)
+#
+#         # Set new password
+#         user.set_password(new_password)
+#         user.save()
+#
+#         # Invalidate the OTP
+#         cache.delete(f"reset_password_otp_{contact_number}")
+#
+#         return JsonResponse({"message": "Password reset successful."}, status=status.HTTP_200_OK)
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            # Get the user's token and delete it to log them out
+            token = Token.objects.get(user=request.user)
+            token.delete()
+            return JsonResponse({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
+        except Token.DoesNotExist:
+            return JsonResponse({"error": "Token not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GetCakesByCategory(APIView):
+    def get(self, request, pk, *args, **kwargs):
+        try:
+            # Check if the category exists and is not marked as deleted
+            category = Category.objects.get(pk=pk, is_deleted=False)
+        except Category.DoesNotExist:
+            return JsonResponse(
+                {"error": "Category not found or has been deleted."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Fetch cakes under the category
+        cakes = Cake.objects.filter(category=category)
+        print("#######",cakes)
+        # Handle empty queryset
+        if not cakes.exists():
+            return JsonResponse(
+                {"message": "No cakes found for this category."},
+                status=status.HTTP_200_OK
+            )
+
+        serializer = CakeSerializer(cakes, many=True)
+        return JsonResponse(serializer.data, status=status.HTTP_200_OK)

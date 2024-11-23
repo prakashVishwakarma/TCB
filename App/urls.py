@@ -18,7 +18,8 @@ from django.contrib import admin
 from django.urls import path
 
 from App.views import GetAllUsers, SignupView, ImageCarouselViewSet, ImageCarouselListView, SoftDeleteImageCarousel, \
-    ImageCarouselPatchView, CreateCategory, GetAllCategory, UpdateCategory, DeleteCategory, UserLoginView
+    ImageCarouselPatchView, CreateCategory, GetAllCategory, UpdateCategory, DeleteCategory, UserLoginView, \
+    LogoutView, GetCakesByCategory
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -33,5 +34,9 @@ urlpatterns = [
     path('update-category/<int:pk>/', UpdateCategory.as_view(), name='UpdateCategory'),
     path('delete-category/<int:pk>/', DeleteCategory.as_view(), name='DeleteCategory'),
     path('login/', UserLoginView.as_view(), name='UserLoginView'),
+    # path('forgot-password/', ForgotPasswordAPIView.as_view(), name='forgot-password'),
+    # path('reset-password/', ResetPasswordWithOTPAPIView.as_view(), name='reset-password'),
+    path('logout/', LogoutView.as_view(), name='logout'),
+    path('get-cake-by-id/<int:pk>/', GetCakesByCategory.as_view(), name='GetCakesByCategory'),
 
 ]
