@@ -391,3 +391,20 @@ class CreateCakeView(APIView):
         except Exception as e:
             print(e)
             return JsonResponse(serializer.errors,str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class GetAllCakes(APIView):
+    def get(self, request):
+        try:
+            cakes = Cake.objects.all()
+            if not cakes.exists():
+                return JsonResponse({'message': 'No cakes found.'}, status=status.HTTP_404_NOT_FOUND)
+            serializer = CakeSerializer(cakes, many=True)
+            return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe = False)
+
+        except Exception as e:
+            print("######",e)
+
+            return JsonResponse(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
