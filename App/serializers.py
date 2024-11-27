@@ -1,8 +1,12 @@
 from rest_framework import serializers
-from .models import UserModel, ImageCarousel, Category, Cake, ClientsSayAboutUs
+from .models import UserModel, ImageCarousel, Category, Cake, ClientsSayAboutUs, CakeCareGuidelines, DeliverySpecifics, \
+    KindlyNote
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
-
+from .models import (
+    Cake, Category, CakeImage, CakeFlavour,
+    SpongeType, FinishType, ProductDescription
+)
 
 class SignupSerializer(serializers.ModelSerializer):
     username = serializers.CharField(required=True)
@@ -70,12 +74,77 @@ class ContactNumberSerializer(serializers.ModelSerializer):
         model = UserModel
         fields = ['mobile_number']
 
-class CakeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Cake
-        fields = '__all__'
+# class CakeSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Cake
+#         fields = '__all__'
 
 class ClientsSayAboutUsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClientsSayAboutUs
+        fields = '__all__'
+
+
+# Nested Serializers for related models
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'category_name', 'cake_image']
+
+class CakeImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CakeImage
+        fields = ['id', 'cake_image']
+
+class CakeFlavourSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CakeFlavour
+        fields = ['id', 'cake_flavour']
+
+class SpongeTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SpongeType
+        fields = ['id', 'sponge_type']
+
+class FinishTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FinishType
+        fields = ['id', 'finish_type']
+
+class CakeCareGuidelinesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CakeCareGuidelines
+        fields = ['id', 'cake_care_guidelines']
+
+
+class DeliverySpecificsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeliverySpecifics
+        fields = ['id', 'delivery_specifics']
+
+
+class KindlyNoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = KindlyNote
+        fields = ['id', 'kindly_note']
+
+class ProductDescriptionSerializer(serializers.ModelSerializer):
+    cake_care_guidelines = CakeCareGuidelinesSerializer(read_only=True)
+    delivery_specifics = DeliverySpecificsSerializer(read_only=True)
+    kindly_note = KindlyNoteSerializer(read_only=True)
+    class Meta:
+        model = ProductDescription
+        fields = ['id', 'kindly_note', 'delivery_specifics', 'cake_care_guidelines']
+
+# Main Cake Serializer with nested relationships
+class CakeSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)
+    cake_image = CakeImageSerializer(read_only=True)
+    cake_flavour = CakeFlavourSerializer(read_only=True)
+    sponge_type = SpongeTypeSerializer(read_only=True)
+    finish_type = FinishTypeSerializer(read_only=True)
+    product_pescription = ProductDescriptionSerializer(read_only=True)
+
+    class Meta:
+        model = Cake
         fields = '__all__'

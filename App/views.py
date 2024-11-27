@@ -417,7 +417,6 @@ class GetCakesByCategory(APIView):
 
         # Fetch cakes under the category
         cakes = Cake.objects.filter(category=category)
-        print("#######",cakes)
         # Handle empty queryset
         if not cakes.exists():
             return JsonResponse(
@@ -450,7 +449,6 @@ class GetAllCakes(APIView):
             return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe = False)
 
         except Exception as e:
-            print("######",e)
             logger.error(str(e))
             return JsonResponse(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
