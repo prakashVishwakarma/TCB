@@ -141,6 +141,18 @@ class PostClientsSayAboutUs(APIView):
             logger.error(str(e))
             api_response(status=500, message=str(e), data={})
 
+class DeleteClientsSayAboutUsById(APIView):
+    def delete(self, request, pk):
+        try:
+            data=ClientsSayAboutUs.objects.get(pk=pk)
+            data.delete()
+            return api_response(status=200, message="Deleted successfully", data={})
+        except Exception as e:
+            logger.error(str(e))
+            api_response(status=500, message=str(e),data={})
+
+
+
 #####################################   FRONTEND   #####################################
 
 class SignupView(APIView):
