@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import UserModel, ImageCarousel, Category, Cake
+from .models import UserModel, ImageCarousel, Category, Cake, ClientsSayAboutUs
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 
@@ -73,4 +73,9 @@ class ContactNumberSerializer(serializers.ModelSerializer):
 class CakeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cake
+        fields = '__all__'
+
+class ClientsSayAboutUsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ClientsSayAboutUs
         fields = '__all__'

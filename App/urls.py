@@ -19,7 +19,7 @@ from django.urls import path
 
 from App.views import GetAllUsers, SignupView, ImageCarouselViewSet, ImageCarouselListView, SoftDeleteImageCarousel, \
     ImageCarouselPatchView, CreateCategory, GetAllCategory, UpdateCategory, DeleteCategory, UserLoginView, \
-    LogoutView, GetCakesByCategory, CreateCakeView, GetAllCakes
+    LogoutView, GetCakesByCategory, CreateCakeView, GetAllCakes, PostClientsSayAboutUs
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -40,4 +40,5 @@ urlpatterns = [
     path('get-cake-by-id/<int:pk>/', GetCakesByCategory.as_view(), name='GetCakesByCategory'),
     path('cakes-create/', CreateCakeView.as_view(), name='create-cake'),
     path('get-all-cakes/', GetAllCakes.as_view(), name='GetAllCakes'),
+    path('client-say-about-us/', PostClientsSayAboutUs.as_view(), name='PostClientsSayAboutUs'),
 ]

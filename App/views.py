@@ -4,16 +4,20 @@ from functools import partial
 
 from django.contrib.auth import authenticate
 from django.core import cache
+from django.core.serializers import serialize
 from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework import status, viewsets
 from App.models import UserModel, ImageCarousel, Category, Cake
 from App.serializers import GetUserSerializer, SignupSerializer, ImageCarouselSerializer, CreateCategorySerializer, \
-    CategorySerializer, ContactNumberSerializer, CakeSerializer
+    CategorySerializer, ContactNumberSerializer, CakeSerializer, ClientsSayAboutUsSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
+from Logger.myLogger import Logger
+from Services.response import api_response
 
+logger =Logger("View")
 # Create your views here.
 
 #####################################   ADMIN   #####################################
@@ -123,6 +127,19 @@ class ImageCarouselViewSet(viewsets.ViewSet):
                 'message': 'Please provide a valid cake image URL.'
             }
             return JsonResponse(response_data, status=status.HTTP_400_BAD_REQUEST)
+
+class PostClientsSayAboutUs(APIView):
+    def post(self, request):
+        try:
+            serializer = ClientsSayAboutUsSerializer(data = request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return api_response(status=201, message=str("Category created successfully"), data={})
+
+            return api_response(status=400, message=str(serializer.errors), data={})
+        except Exception as e:
+            logger.error(str(e))
+            api_response(status=500, message=str(e), data={})
 
 #####################################   FRONTEND   #####################################
 
@@ -404,7 +421,7 @@ class GetAllCakes(APIView):
 
         except Exception as e:
             print("######",e)
-
+            logger.error(str(e))
             return JsonResponse(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
