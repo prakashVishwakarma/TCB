@@ -151,7 +151,27 @@ class DeleteClientsSayAboutUsById(APIView):
             logger.error(str(e))
             api_response(status=500, message=str(e),data={})
 
+class UpdateClientsSayAboutUs(APIView):
+    def put(self, request, pk):
+        try:
+            data = ClientsSayAboutUs.objects.get(pk=pk)
+            print("##################################################",data)
+            serializer = ClientsSayAboutUsSerializer(data, data=request.data, partial=True)
 
+            if serializer.is_valid():
+                serializer.save()  # Save the changes
+                return JsonResponse({"message":"updated successfully"},status=status.HTTP_200_OK)
+            else:
+                return JsonResponse({"message": "Invalid data", "errors": serializer.errors},
+                                    status=status.HTTP_400_BAD_REQUEST)
+
+        except ClientsSayAboutUs.DoesNotExist:
+            # If the object doesn't exist, return a 404 error
+            return JsonResponse({"message": "Record not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception as e:
+            logger.error(str(e))
+            api_response(status=500, message=str(e), data={})
 
 #####################################   FRONTEND   #####################################
 
