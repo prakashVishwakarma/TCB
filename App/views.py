@@ -8,7 +8,7 @@ from django.core.serializers import serialize
 from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework import status, viewsets
-from App.models import UserModel, ImageCarousel, Category, Cake
+from App.models import UserModel, ImageCarousel, Category, Cake, ClientsSayAboutUs
 from App.serializers import GetUserSerializer, SignupSerializer, ImageCarouselSerializer, CreateCategorySerializer, \
     CategorySerializer, ContactNumberSerializer, CakeSerializer, ClientsSayAboutUsSerializer
 from rest_framework.authtoken.models import Token
@@ -372,7 +372,6 @@ class LogoutView(APIView):
         except Token.DoesNotExist:
             return JsonResponse({"error": "Token not found"}, status=status.HTTP_400_BAD_REQUEST)
 
-
 class GetCakesByCategory(APIView):
     def get(self, request, pk, *args, **kwargs):
         try:
@@ -409,7 +408,6 @@ class CreateCakeView(APIView):
             print(e)
             return JsonResponse(serializer.errors,str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
 class GetAllCakes(APIView):
     def get(self, request):
         try:
@@ -425,3 +423,18 @@ class GetAllCakes(APIView):
             return JsonResponse(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+class GetAllClientsSayAboutUs(APIView):
+    def get(self, request):
+        try:
+            data = ClientsSayAboutUs.objects.all()
+            if not data.exists():
+                return api_response(status=404, message=str("No review found"), data={})
+
+            serializer = ClientsSayAboutUsSerializer(data, many=True)
+            # if serializer.is_valid():
+            return api_response(status=200, message=str("review found successfully"), data=serializer.data)
+            # return api_response(status=404, message=str("No review found over here"), data={})
+        except Exception as e:
+            logger.error(str(e))
+            api_response(status=500, message=str(e), data={})
