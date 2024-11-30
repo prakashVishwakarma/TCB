@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from rest_framework import status, viewsets
 from App.models import UserModel, ImageCarousel, Category, Cake, ClientsSayAboutUs
 from App.serializers import GetUserSerializer, SignupSerializer, ImageCarouselSerializer, CreateCategorySerializer, \
-    CategorySerializer, ContactNumberSerializer, CakeSerializer, ClientsSayAboutUsSerializer
+    CategorySerializer, ContactNumberSerializer, CakeSerializer, ClientsSayAboutUsSerializer, AddToCartSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
@@ -434,18 +434,19 @@ class CreateCakeView(APIView):
             if serializer.is_valid():
                 serializer.save()
                 return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
-            return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            print(e)
-            return JsonResponse(serializer.errors,str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.error(str(e))
+            return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class GetAllCakes(APIView):
     def get(self, request):
         try:
             cakes = Cake.objects.all()
+
             if not cakes.exists():
                 return JsonResponse({'message': 'No cakes found.'}, status=status.HTTP_404_NOT_FOUND)
             serializer = CakeSerializer(cakes, many=True)
+
             return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe = False)
 
         except Exception as e:
@@ -468,3 +469,4 @@ class GetAllClientsSayAboutUs(APIView):
         except Exception as e:
             logger.error(str(e))
             api_response(status=500, message=str(e), data={})
+

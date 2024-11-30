@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import UserModel, ImageCarousel, Category, Cake, ClientsSayAboutUs, CakeCareGuidelines, DeliverySpecifics, \
-    KindlyNote
+    KindlyNote, AddToCart
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from .models import (
@@ -89,7 +89,7 @@ class ClientsSayAboutUsSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['id', 'category_name', 'cake_image']
+        fields = ['id', 'cake_image', 'category_name', 'is_deleted']
 
 class CakeImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -111,40 +111,92 @@ class FinishTypeSerializer(serializers.ModelSerializer):
         model = FinishType
         fields = ['id', 'finish_type']
 
-class CakeCareGuidelinesSerializer(serializers.ModelSerializer):
+class KindlyNoteSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CakeCareGuidelines
-        fields = ['id', 'cake_care_guidelines']
-
+        model = KindlyNote
+        fields = ['id', 'kindly_note']
 
 class DeliverySpecificsSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeliverySpecifics
         fields = ['id', 'delivery_specifics']
 
-
-class KindlyNoteSerializer(serializers.ModelSerializer):
+class CakeCareGuidelinesSerializer(serializers.ModelSerializer):
     class Meta:
-        model = KindlyNote
-        fields = ['id', 'kindly_note']
+        model = CakeCareGuidelines
+        fields = ['id', 'cake_care_guidelines']
 
 class ProductDescriptionSerializer(serializers.ModelSerializer):
-    cake_care_guidelines = CakeCareGuidelinesSerializer(read_only=True)
-    delivery_specifics = DeliverySpecificsSerializer(read_only=True)
-    kindly_note = KindlyNoteSerializer(read_only=True)
+    kindly_note = KindlyNoteSerializer()
+    delivery_specifics = DeliverySpecificsSerializer()
+    cake_care_guidelines = CakeCareGuidelinesSerializer()
+
     class Meta:
         model = ProductDescription
         fields = ['id', 'kindly_note', 'delivery_specifics', 'cake_care_guidelines']
 
-# Main Cake Serializer with nested relationships
+    def create(self, validated_data):
+        kindly_note_data = validated_data.pop('kindly_note')
+        delivery_specifics_data = validated_data.pop('delivery_specifics')
+        cake_care_guidelines_data = validated_data.pop('cake_care_guidelines')
+
+        kindly_note = KindlyNote.objects.create(**kindly_note_data)
+        delivery_specifics = DeliverySpecifics.objects.create(**delivery_specifics_data)
+        cake_care_guidelines = CakeCareGuidelines.objects.create(**cake_care_guidelines_data)
+
+        return ProductDescription.objects.create(
+            kindly_note=kindly_note,
+            delivery_specifics=delivery_specifics,
+            cake_care_guidelines=cake_care_guidelines,
+            **validated_data
+        )
+
+
 class CakeSerializer(serializers.ModelSerializer):
-    category = CategorySerializer(read_only=True)
-    cake_image = CakeImageSerializer(read_only=True)
-    cake_flavour = CakeFlavourSerializer(read_only=True)
-    sponge_type = SpongeTypeSerializer(read_only=True)
-    finish_type = FinishTypeSerializer(read_only=True)
-    product_pescription = ProductDescriptionSerializer(read_only=True)
+    category = CategorySerializer()
+    cake_image = CakeImageSerializer()
+    cake_flavour = CakeFlavourSerializer()
+    sponge_type = SpongeTypeSerializer()
+    finish_type = FinishTypeSerializer()
+    product_pescription = ProductDescriptionSerializer()
 
     class Meta:
         model = Cake
-        fields = '__all__'
+        fields = [
+            'id', 'category', 'cake_image', 'cake_flavour', 'sponge_type', 'finish_type',
+            'product_pescription', 'discount', 'name', 'price', 'weight',
+            'earliest_delivery', 'unique_quality', 'CakeMessage'
+        ]
+
+    def create(self, validated_data):
+        category_data = validated_data.pop('category')
+        cake_image_data = validated_data.pop('cake_image')
+        cake_flavour_data = validated_data.pop('cake_flavour')
+        sponge_type_data = validated_data.pop('sponge_type')
+        finish_type_data = validated_data.pop('finish_type')
+        product_pescription_data = validated_data.pop('product_pescription')
+
+        category = Category.objects.create(**category_data)
+        cake_image = CakeImage.objects.create(**cake_image_data)
+        cake_flavour = CakeFlavour.objects.create(**cake_flavour_data)
+        sponge_type = SpongeType.objects.create(**sponge_type_data)
+        finish_type = FinishType.objects.create(**finish_type_data)
+        product_pescription = ProductDescriptionSerializer().create(product_pescription_data)
+
+        return Cake.objects.create(
+            category=category,
+            cake_image=cake_image,
+            cake_flavour=cake_flavour,
+            sponge_type=sponge_type,
+            finish_type=finish_type,
+            product_pescription=product_pescription,
+            **validated_data
+        )
+
+class AddToCartSerializer(serializers.ModelSerializer):
+    cake = CakeSerializer(read_only=True)
+    user_model = SignupSerializer(read_only=True)
+
+    class Meta:
+        model = AddToCart
+        fields = ['quantity','cake','user_model']
