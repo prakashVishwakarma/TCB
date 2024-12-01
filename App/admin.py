@@ -13,7 +13,7 @@ from App.models import UserModel, ImageCarousel, Category, CakeImage, CakeFlavou
 
 @admin.register(UserModel)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ['user', 'mobile_number']
+    list_display = ['id','user', 'mobile_number']
 
 
 @admin.register(ImageCarousel)

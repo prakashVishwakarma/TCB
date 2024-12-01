@@ -193,9 +193,23 @@ class CakeSerializer(serializers.ModelSerializer):
             **validated_data
         )
 
+# Serializer for User model
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email']
+
+# Serializer for UserModel
+class UserModelSerializer(serializers.ModelSerializer):
+    user = UserSerializer()  # Nested User serializer
+
+    class Meta:
+        model = UserModel
+        fields = ['user', 'mobile_number']
+
 class AddToCartSerializer(serializers.ModelSerializer):
     cake = CakeSerializer(read_only=True)
-    user_model = SignupSerializer(read_only=True)
+    user_model = UserModelSerializer(read_only=True)
 
     class Meta:
         model = AddToCart

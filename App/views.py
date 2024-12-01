@@ -8,7 +8,7 @@ from django.core.serializers import serialize
 from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework import status, viewsets
-from App.models import UserModel, ImageCarousel, Category, Cake, ClientsSayAboutUs
+from App.models import UserModel, ImageCarousel, Category, Cake, ClientsSayAboutUs, AddToCart
 from App.serializers import GetUserSerializer, SignupSerializer, ImageCarouselSerializer, CreateCategorySerializer, \
     CategorySerializer, ContactNumberSerializer, CakeSerializer, ClientsSayAboutUsSerializer, AddToCartSerializer
 from rest_framework.authtoken.models import Token
@@ -470,3 +470,29 @@ class GetAllClientsSayAboutUs(APIView):
             logger.error(str(e))
             api_response(status=500, message=str(e), data={})
 
+class PostAddToCart(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        data = request.data
+        try:
+            # Validate related objects
+            user_model = UserModel.objects.get(id=data.get('user_model'))
+            cake = Cake.objects.get(id=data.get('cake'))
+
+            # Create a new AddToCart entry
+            cart_item = AddToCart.objects.create(
+                user_model=user_model,
+                cake=cake,
+                quantity=data.get('quantity', 1)
+            )
+            serializer = AddToCartSerializer(cart_item)
+            return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
+
+        except UserModel.DoesNotExist:
+            return JsonResponse({"error": "UserModel not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Cake.DoesNotExist:
+            return JsonResponse({"error": "Cake not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(str(e))
+            api_response(status=500, message=str(e), data={})
