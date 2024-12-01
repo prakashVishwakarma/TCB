@@ -8,7 +8,8 @@ from django.core.serializers import serialize
 from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework import status, viewsets
-from App.models import UserModel, ImageCarousel, Category, Cake, ClientsSayAboutUs, AddToCart
+from App.models import UserModel, ImageCarousel, Category, Cake, ClientsSayAboutUs, AddToCart, CakeFlavour, SpongeType, \
+    FinishType
 from App.serializers import GetUserSerializer, SignupSerializer, ImageCarouselSerializer, CreateCategorySerializer, \
     CategorySerializer, ContactNumberSerializer, CakeSerializer, ClientsSayAboutUsSerializer, AddToCartSerializer
 from rest_framework.authtoken.models import Token
@@ -473,12 +474,36 @@ class GetAllClientsSayAboutUs(APIView):
 class PostAddToCart(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         data = request.data
         try:
-            # Validate related objects
+            # Validate user_model
             user_model = UserModel.objects.get(id=data.get('user_model'))
-            cake = Cake.objects.get(id=data.get('cake'))
+
+            # Retrieve or validate cake
+            try:
+                cake = Cake.objects.get(id=data.get('cake'))
+            except Cake.DoesNotExist:
+                return JsonResponse({"error": "Cake not found"}, status=status.HTTP_404_NOT_FOUND)
+
+            # Validate and associate cake options
+            try:
+                cake_flavour = CakeFlavour.objects.get(id=data.get('cake_flavour'))
+                sponge_type = SpongeType.objects.get(id=data.get('sponge_type'))
+                finish_type = FinishType.objects.get(id=data.get('finish_type'))
+            except (CakeFlavour.DoesNotExist, SpongeType.DoesNotExist, FinishType.DoesNotExist) as e:
+                return JsonResponse(
+                    {"error": f"Invalid cake options provided: {str(e)}"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Assign fields to the cake instance
+            cake.cake_flavour = cake_flavour
+            cake.sponge_type = sponge_type
+            cake.finish_type = finish_type
+
+            # Save the cake instance
+            cake.save()
 
             # Create a new AddToCart entry
             cart_item = AddToCart.objects.create(
@@ -486,13 +511,15 @@ class PostAddToCart(APIView):
                 cake=cake,
                 quantity=data.get('quantity', 1)
             )
+
+            # Serialize and return the created cart item
             serializer = AddToCartSerializer(cart_item)
             return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
 
         except UserModel.DoesNotExist:
             return JsonResponse({"error": "UserModel not found"}, status=status.HTTP_404_NOT_FOUND)
-        except Cake.DoesNotExist:
-            return JsonResponse({"error": "Cake not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.error(str(e))
             api_response(status=500, message=str(e), data={})
