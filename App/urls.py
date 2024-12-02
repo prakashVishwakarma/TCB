@@ -20,7 +20,7 @@ from django.urls import path
 from App.views import GetAllUsers, SignupView, ImageCarouselViewSet, ImageCarouselListView, SoftDeleteImageCarousel, \
     ImageCarouselPatchView, CreateCategory, GetAllCategory, UpdateCategory, DeleteCategory, UserLoginView, \
     LogoutView, GetCakesByCategory, CreateCakeView, GetAllCakes, PostClientsSayAboutUs, GetAllClientsSayAboutUs, \
-    DeleteClientsSayAboutUsById, UpdateClientsSayAboutUs, PostAddToCart, GetAllAddToCart
+    DeleteClientsSayAboutUsById, UpdateClientsSayAboutUs, PostAddToCart, GetAddToCartByUser
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -46,5 +46,5 @@ urlpatterns = [
     path('delete-client-say-about-us/<int:pk>/', DeleteClientsSayAboutUsById.as_view(), name='DeleteClientsSayAboutUsById'),
     path('update-client-say-about-us/<int:pk>/', UpdateClientsSayAboutUs.as_view(), name='UpdateClientsSayAboutUs'),
     path('add-to-cart/', PostAddToCart.as_view(), name='PostAddToCart'),
-    path('get-all-add-to-cart/', GetAllAddToCart.as_view(), name='GetAllAddToCart'),
+    path('get-all-add-to-cart/<int:user_id>/', GetAddToCartByUser.as_view(), name='GetAddToCartByUser'),
 ]

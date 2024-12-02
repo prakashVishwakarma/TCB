@@ -523,3 +523,26 @@ class PostAddToCart(APIView):
         except Exception as e:
             logger.error(str(e))
             api_response(status=500, message=str(e), data={})
+
+class GetAddToCartByUser(APIView):
+    def get(self, request, *args, **kwargs):
+        try:
+            user_id = kwargs.get('user_id')
+            try:
+                user = UserModel.objects.get(id=user_id)
+
+            except UserModel.DoesNotExist:
+                return JsonResponse({"error": "user not found or has been deleted."},status=status.HTTP_404_NOT_FOUND )
+
+            cart_items = AddToCart.objects.filter(user_model=user)
+            serializer = AddToCartSerializer(cart_items, many=True )
+
+            # Handle empty queryset
+            if not cart_items.exists():
+                return JsonResponse({"message": "No cart items found"}, status=status.HTTP_200_OK )
+
+            return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False)
+
+        except Exception as e:
+            logger.error(str(e))
+            api_response(status=500, message=str(e), data={})
