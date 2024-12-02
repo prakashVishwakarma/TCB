@@ -101,6 +101,7 @@ class AddToCart(models.Model):
     user_model = models.ForeignKey(UserModel, on_delete=models.CASCADE)
     cake = models.ForeignKey(Cake, on_delete=models.CASCADE)
     quantity = models.DecimalField(max_digits=10, decimal_places=2)
+    is_deleted = models.BooleanField(default=False)
 
 class Addresses(models.Model):
     user_model = models.ForeignKey(UserModel, on_delete=models.CASCADE)

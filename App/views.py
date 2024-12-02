@@ -534,7 +534,7 @@ class GetAddToCartByUser(APIView):
             except UserModel.DoesNotExist:
                 return JsonResponse({"error": "user not found or has been deleted."},status=status.HTTP_404_NOT_FOUND )
 
-            cart_items = AddToCart.objects.filter(user_model=user)
+            cart_items = AddToCart.objects.filter(user_model=user, is_deleted=False)
             serializer = AddToCartSerializer(cart_items, many=True )
 
             # Handle empty queryset
@@ -542,6 +542,41 @@ class GetAddToCartByUser(APIView):
                 return JsonResponse({"message": "No cart items found"}, status=status.HTTP_200_OK )
 
             return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False)
+
+        except Exception as e:
+            logger.error(str(e))
+            api_response(status=500, message=str(e), data={})
+
+class DeleteAddToCartById(APIView):
+    def delete(self, request, pk):
+        try:
+            try:
+                user = UserModel.objects.get(pk=pk)
+            except UserModel.DoesNotExist:
+                return JsonResponse({"error": "user not found or has been deleted."},status=status.HTTP_404_NOT_FOUND )
+
+            cart_items = AddToCart.objects.filter(user_model=user, is_deleted=False)
+
+            # Filter the specific cart item based on the id
+            cart_item_id = request.data.get("cart_item_id")  # Assuming you pass `cart_item_id` in the request
+            cart_item = cart_items.filter(id=cart_item_id).first()
+
+            if not cart_item:
+                return JsonResponse(
+                    {"error": "Cart item not found or already deleted."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            # if removeCakeFromCart.is_deleted:
+            #     return JsonResponse({"error": "This cake is already deleted."}, status=status.HTTP_400_BAD_REQUEST )
+
+            serializer = AddToCartSerializer(cart_item, data={"is_deleted": True}, partial=True )  # Allow partial updates ,partial=True
+
+            if serializer.is_valid():
+                serializer.save()  # Save the changes
+                return JsonResponse({"message":"deleted successfully","data":serializer.data}, status=status.HTTP_204_NO_CONTENT )
+
+            return JsonResponse( serializer.errors, status=status.HTTP_400_BAD_REQUEST )
 
         except Exception as e:
             logger.error(str(e))

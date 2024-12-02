@@ -213,4 +213,4 @@ class AddToCartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AddToCart
-        fields = ['quantity','cake','user_model']
+        fields = ['quantity','cake','user_model','is_deleted']

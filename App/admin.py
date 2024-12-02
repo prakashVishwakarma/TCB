@@ -82,7 +82,7 @@ class ClientsSayAboutUsAdmin(admin.ModelAdmin):
 
 @admin.register(AddToCart)
 class AddToCartAdmin(admin.ModelAdmin):
-    list_display = ['id','user_model','cake','quantity']
+    list_display = ['id','user_model','cake','quantity', 'is_deleted']
 
 @admin.register(Addresses)
 class AddressesAdmin(admin.ModelAdmin):
