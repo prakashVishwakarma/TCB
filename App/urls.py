@@ -20,7 +20,8 @@ from django.urls import path
 from App.views import GetAllUsers, SignupView, ImageCarouselViewSet, ImageCarouselListView, SoftDeleteImageCarousel, \
     ImageCarouselPatchView, CreateCategory, GetAllCategory, UpdateCategory, DeleteCategory, UserLoginView, \
     LogoutView, GetCakesByCategory, CreateCakeView, GetAllCakes, PostClientsSayAboutUs, GetAllClientsSayAboutUs, \
-    DeleteClientsSayAboutUsById, UpdateClientsSayAboutUs, PostAddToCart, GetAddToCartByUser, DeleteAddToCartById
+    DeleteClientsSayAboutUsById, UpdateClientsSayAboutUs, PostAddToCart, GetAddToCartByUser, DeleteAddToCartById, \
+    QuantityHandler
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -48,4 +49,5 @@ urlpatterns = [
     path('add-to-cart/', PostAddToCart.as_view(), name='PostAddToCart'),
     path('get-add-to-cart/<int:user_id>/', GetAddToCartByUser.as_view(), name='GetAddToCartByUser'),
     path('delete-add-to-cart/<int:pk>/', DeleteAddToCartById.as_view(), name='DeleteAddToCartById'),
+    path('update-quantity-of-add-to-cart/<int:user_id>/', QuantityHandler.as_view(), name='QuantityHandler'),
 ]

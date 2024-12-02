@@ -566,15 +566,43 @@ class DeleteAddToCartById(APIView):
                     {"error": "Cart item not found or already deleted."},
                     status=status.HTTP_404_NOT_FOUND
                 )
-
-            # if removeCakeFromCart.is_deleted:
-            #     return JsonResponse({"error": "This cake is already deleted."}, status=status.HTTP_400_BAD_REQUEST )
-
             serializer = AddToCartSerializer(cart_item, data={"is_deleted": True}, partial=True )  # Allow partial updates ,partial=True
 
             if serializer.is_valid():
                 serializer.save()  # Save the changes
                 return JsonResponse({"message":"deleted successfully","data":serializer.data}, status=status.HTTP_204_NO_CONTENT )
+
+            return JsonResponse( serializer.errors, status=status.HTTP_400_BAD_REQUEST )
+
+        except Exception as e:
+            logger.error(str(e))
+            api_response(status=500, message=str(e), data={})
+
+class QuantityHandler(APIView):
+    def patch(self, request, user_id):
+        try:
+            try:
+                user = UserModel.objects.get(id=user_id)
+            except UserModel.DoesNotExist:
+                return JsonResponse({"error": "user not found or has been deleted."}, status=status.HTTP_404_NOT_FOUND)
+
+            cart_items = AddToCart.objects.filter(user_model=user, is_deleted=False)
+
+            # Filter the specific cart item based on the id
+            cart_item_id = request.data.get("cart_item_id")  # Assuming you pass `cart_item_id` in the request
+            quantity = request.data.get("quantity")  # Assuming you pass `cart_item_id` in the request
+            cart_item = cart_items.filter(id=cart_item_id).first()
+
+            if not cart_item:
+                return JsonResponse(
+                    {"error": "Cart item not found or already deleted."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            serializer = AddToCartSerializer(cart_item, data={"quantity": quantity}, partial=True )  # Allow partial updates ,partial=True
+
+            if serializer.is_valid():
+                serializer.save()  # Save the changes
+                return JsonResponse({"message":"quantity updated successfully","data":serializer.data}, status=status.HTTP_204_NO_CONTENT )
 
             return JsonResponse( serializer.errors, status=status.HTTP_400_BAD_REQUEST )
 
