@@ -649,15 +649,29 @@ class GetAddress(APIView):
                 user_model = get_object_or_404(UserModel, id=user_id)
             except Exception as e:
                 # Handle any unexpected issues gracefully
-                return api_response(status=400, message=f"User with id {user_id} not found.", data={"e":"user_model"})
+                return api_response(status=400, message=f"User with id {user_id} not found.", data={})
 
             all_addresses = Addresses.objects.filter(user_model=user_model)
             serializer = AddressesSerializer(instance=all_addresses, many=True)
-            # if serializer.is_valid():
-            return api_response(status=200, message=str("getting address successfully"), data=serializer.data)
-
-            # return api_response(status=400, message=str(serializer.errors), data={"e":"if not serializer.is_valid():"})
+            return api_response(status=200, message=str("getting address successfully"), data={})
 
         except Exception as e:
             logger.error(str(e))
-            api_response(status=500, message=str(e), data={"e":"except Exception as e:"})
+            api_response(status=500, message=str(e), data={})
+
+class UpdateAddress(APIView):
+    def put(self, request, user_id):
+        try:
+            user_model = UserModel.objects.get(id=user_id)
+            address_id = request.data.get('address_id')
+            address = Addresses.objects.get(user_model=user_model, id=address_id)
+            serializer = AddressesSerializer(address, data=request.data, partial=True)
+
+            if serializer.is_valid():
+                serializer.save()
+                return api_response(status=201, message="Updated successfully", data={})
+
+            return api_response(status=400, message={serializer.errors}, data={})
+        except Exception as e:
+            logger.error(str(e))
+            api_response(status=500, message=str(e), data={})
