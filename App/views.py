@@ -665,13 +665,41 @@ class UpdateAddress(APIView):
             user_model = UserModel.objects.get(id=user_id)
             address_id = request.data.get('address_id')
             address = Addresses.objects.get(user_model=user_model, id=address_id)
-            serializer = AddressesSerializer(address, data=request.data, partial=True)
 
-            if serializer.is_valid():
-                serializer.save()
-                return api_response(status=201, message="Updated successfully", data={})
+            # OPTIMIZED CODE FROM CHATgPT
 
-            return api_response(status=400, message={serializer.errors}, data={})
+            # # Define a list of fields to update
+            # updatable_fields = [
+            #     'flat_no', 'street', 'society_name', 'area', 'landmark',
+            #     'google_location_url', 'pincode', 'city', 'mobile_number',
+            #     'alternate_mobile_number', 'address_type'
+            # ]
+            #
+            # # Update fields dynamically
+            # for field in updatable_fields:
+            #     if field in request.data:
+            #         setattr(address, field, request.data[field])
+
+            address.flat_no=request.data.get('flat_no', address.flat_no)
+            address.street=request.data.get('street', address.street)
+            address.society_name=request.data.get('society_name', address.society_name)
+            address.area=request.data.get('area', address.area)
+            address.landmark=request.data.get('landmark', address.landmark)
+            address.google_location_url=request.data.get('google_location_url', address.google_location_url)
+            address.pincode=request.data.get('pincode', address.pincode)
+            address.city=request.data.get('city', address.city)
+            address.mobile_number=request.data.get('mobile_number', address.mobile_number)
+            address.alternate_mobile_number=request.data.get('alternate_mobile_number', address.alternate_mobile_number)
+            address.address_type=request.data.get('address_type', address.address_type)
+
+            address.save()
+            # serializer = AddressesSerializer(address, data=request.data, partial=True)
+            #
+            # if serializer.is_valid():
+            #     serializer.save()
+            #     return api_response(status=201, message="Updated successfully", data={})
+
+            return api_response(status=201, message="Updated successfully", data={})
         except Exception as e:
             logger.error(str(e))
             api_response(status=500, message=str(e), data={})
