@@ -640,3 +640,24 @@ class CreateAddress(APIView):
         except Exception as e:
             logger.error(str(e))
             api_response(status=500, message=str(e), data={})
+
+class GetAddress(APIView):
+    def get(self, request, user_id):
+        try:
+            try:
+                # Attempt to fetch the user
+                user_model = get_object_or_404(UserModel, id=user_id)
+            except Exception as e:
+                # Handle any unexpected issues gracefully
+                return api_response(status=400, message=f"User with id {user_id} not found.", data={"e":"user_model"})
+
+            all_addresses = Addresses.objects.filter(user_model=user_model)
+            serializer = AddressesSerializer(instance=all_addresses, many=True)
+            # if serializer.is_valid():
+            return api_response(status=200, message=str("getting address successfully"), data=serializer.data)
+
+            # return api_response(status=400, message=str(serializer.errors), data={"e":"if not serializer.is_valid():"})
+
+        except Exception as e:
+            logger.error(str(e))
+            api_response(status=500, message=str(e), data={"e":"except Exception as e:"})
