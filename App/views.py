@@ -1,17 +1,20 @@
 import json
 import random
 from functools import partial
+from symtable import Class
 
 from django.contrib.auth import authenticate
 from django.core import cache
 from django.core.serializers import serialize
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework import status, viewsets
 from App.models import UserModel, ImageCarousel, Category, Cake, ClientsSayAboutUs, AddToCart, CakeFlavour, SpongeType, \
-    FinishType
+    FinishType, Addresses
 from App.serializers import GetUserSerializer, SignupSerializer, ImageCarouselSerializer, CreateCategorySerializer, \
-    CategorySerializer, ContactNumberSerializer, CakeSerializer, ClientsSayAboutUsSerializer, AddToCartSerializer
+    CategorySerializer, ContactNumberSerializer, CakeSerializer, ClientsSayAboutUsSerializer, AddToCartSerializer, \
+    AddressesSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
@@ -606,6 +609,34 @@ class QuantityHandler(APIView):
 
             return JsonResponse( serializer.errors, status=status.HTTP_400_BAD_REQUEST )
 
+        except Exception as e:
+            logger.error(str(e))
+            api_response(status=500, message=str(e), data={})
+
+class CreateAddress(APIView):
+    def post(self, request, user_id, *args, **kwargs):
+        try:
+            # Use the serializer only for validation
+            serializer = AddressesSerializer(data=request.data)
+
+            if serializer.is_valid():
+                data = serializer.validated_data
+
+                # Fetch the user model instance based on the provided user_model ID
+                user_model = get_object_or_404(UserModel, id=user_id)  # Fetch the UserModel instance
+
+                # Create the address with the foreign key object
+                address = Addresses.objects.create(user_model=user_model, **data)
+
+                # Prepare response
+                response_data = {
+                    "id": address.id,
+                    "message": "Address created successfully."
+                }
+                return JsonResponse(response_data, status=status.HTTP_201_CREATED)
+            else:
+                # Return validation errors
+                return api_response(status=500, message=str(serializer.errors), data={})
         except Exception as e:
             logger.error(str(e))
             api_response(status=500, message=str(e), data={})

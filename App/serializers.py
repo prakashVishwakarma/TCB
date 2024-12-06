@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import UserModel, ImageCarousel, Category, Cake, ClientsSayAboutUs, CakeCareGuidelines, DeliverySpecifics, \
-    KindlyNote, AddToCart
+    KindlyNote, AddToCart, Addresses
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from .models import (
@@ -214,3 +214,11 @@ class AddToCartSerializer(serializers.ModelSerializer):
     class Meta:
         model = AddToCart
         fields = ['quantity','cake','user_model','is_deleted']
+
+class AddressesSerializer(serializers.ModelSerializer):
+    user_model = UserModelSerializer(read_only=True)
+
+    class Meta:
+        model = Addresses
+        fields = ['id','user_model','flat_no','street','society_name','area','landmark','google_location_url','pincode','city','mobile_number','alternate_mobile_number','address_type']
+

@@ -21,7 +21,7 @@ from App.views import GetAllUsers, SignupView, ImageCarouselViewSet, ImageCarous
     ImageCarouselPatchView, CreateCategory, GetAllCategory, UpdateCategory, DeleteCategory, UserLoginView, \
     LogoutView, GetCakesByCategory, CreateCakeView, GetAllCakes, PostClientsSayAboutUs, GetAllClientsSayAboutUs, \
     DeleteClientsSayAboutUsById, UpdateClientsSayAboutUs, PostAddToCart, GetAddToCartByUser, DeleteAddToCartById, \
-    QuantityHandler
+    QuantityHandler, CreateAddress
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -50,4 +50,5 @@ urlpatterns = [
     path('get-add-to-cart/<int:user_id>/', GetAddToCartByUser.as_view(), name='GetAddToCartByUser'),
     path('delete-add-to-cart/<int:pk>/', DeleteAddToCartById.as_view(), name='DeleteAddToCartById'),
     path('update-quantity-of-add-to-cart/<int:user_id>/', QuantityHandler.as_view(), name='QuantityHandler'),
+    path('create-address/<int:user_id>/', CreateAddress.as_view(), name='QuantityHandler'),
 ]
