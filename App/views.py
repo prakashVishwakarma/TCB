@@ -11,10 +11,10 @@ from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework import status, viewsets
 from App.models import UserModel, ImageCarousel, Category, Cake, ClientsSayAboutUs, AddToCart, CakeFlavour, SpongeType, \
-    FinishType, Addresses
+    FinishType, Addresses, Personalization
 from App.serializers import GetUserSerializer, SignupSerializer, ImageCarouselSerializer, CreateCategorySerializer, \
     CategorySerializer, ContactNumberSerializer, CakeSerializer, ClientsSayAboutUsSerializer, AddToCartSerializer, \
-    AddressesSerializer
+    AddressesSerializer, PersonalizationSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
@@ -703,3 +703,54 @@ class UpdateAddress(APIView):
         except Exception as e:
             logger.error(str(e))
             api_response(status=500, message=str(e), data={})
+
+class DeleteAddress(APIView):
+    def delete(self, request, user_id):
+        try:
+            user_model = UserModel.objects.get(id=user_id)
+            address_id = request.data.get('address_id')
+
+            address = Addresses.objects.filter(user_model=user_model,id=address_id)
+            address.delete()
+
+            return api_response(status=200, message="Deleted successfully", data={})
+        except Exception as e:
+            logger.error(str(e))
+            api_response(status=500, message=str(e), data={})
+
+class AddPersonalization(APIView):
+    def post(self, request, user_id):
+        try:
+            # Log or print the data for debugging
+            print("####### add_delivery_date:", request.data.get("add_delivery_date"))
+
+            # Validate serializer
+            serializer = PersonalizationSerializer(data=request.data)
+            if not serializer.is_valid():
+                return api_response(status=status.HTTP_400_BAD_REQUEST, message="Invalid data", data=serializer.errors)
+
+            # Fetch related objects
+            user_model = get_object_or_404(UserModel, id=request.data.get("user_model"))
+            add_to_cart = get_object_or_404(AddToCart, id=request.data.get("add_to_cart"))
+
+            # Create the Personalization instance
+            personalization = Personalization.objects.create(
+                user_model=user_model,
+                add_to_cart=add_to_cart,
+                add_delivery_date=request.data.get("add_delivery_date"),
+                add_delivery_time=request.data.get("add_delivery_time"),
+                personal_message=request.data.get("personal_message"),
+                name=request.data.get("name"),
+                number=request.data.get("number"),
+            )
+
+            # Return success response
+            response_data = PersonalizationSerializer(personalization).data
+            return api_response(status=status.HTTP_201_CREATED, message="Personalization created successfully", data=response_data)
+
+        except Exception as e:
+            # Log the error and return server error response
+            logger.error(f"Error while creating personalization: {str(e)}")
+            return api_response(status=status.HTTP_500_INTERNAL_SERVER_ERROR, message="An error occurred while creating personalization", data={})
+
+
