@@ -21,7 +21,7 @@ from App.views import GetAllUsers, SignupView, ImageCarouselViewSet, ImageCarous
     ImageCarouselPatchView, CreateCategory, GetAllCategory, UpdateCategory, DeleteCategory, UserLoginView, \
     LogoutView, GetCakesByCategory, CreateCakeView, GetAllCakes, PostClientsSayAboutUs, GetAllClientsSayAboutUs, \
     DeleteClientsSayAboutUsById, UpdateClientsSayAboutUs, PostAddToCart, GetAddToCartByUser, DeleteAddToCartById, \
-    QuantityHandler, CreateAddress, GetAddress, UpdateAddress, DeleteAddress, AddPersonalization
+    QuantityHandler, CreateAddress, GetAddress, UpdateAddress, DeleteAddress, AddPersonalization, create_razorpay_order
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -55,4 +55,5 @@ urlpatterns = [
     path('update-address/<int:user_id>/', UpdateAddress.as_view(), name='UpdateAddress'),
     path('delete-address/<int:user_id>/', DeleteAddress.as_view(), name='DeleteAddress'),
     path('add-persionalization/<int:user_id>/', AddPersonalization.as_view(), name='AddPersonalization'),
+    path('create-razorpay-order/', create_razorpay_order, name='create-razorpay-order'),
 ]

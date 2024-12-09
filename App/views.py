@@ -3,11 +3,13 @@ import random
 from functools import partial
 from symtable import Class
 
+import razorpay
 from django.contrib.auth import authenticate
 from django.core import cache
 from django.core.serializers import serialize
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 from rest_framework import status, viewsets
 from App.models import UserModel, ImageCarousel, Category, Cake, ClientsSayAboutUs, AddToCart, CakeFlavour, SpongeType, \
@@ -753,4 +755,52 @@ class AddPersonalization(APIView):
             logger.error(f"Error while creating personalization: {str(e)}")
             return api_response(status=status.HTTP_500_INTERNAL_SERVER_ERROR, message="An error occurred while creating personalization", data={})
 
+@csrf_exempt
+def create_razorpay_order(request):
+    try:
+        # Initialize Razorpay client
+        client = razorpay.Client(auth=("rzp_test_Fv73fPErrtwXsl", "uvxt1pCdqnO2TC0hefc3ZY1b"))
 
+        # Extract required data from the request
+        amount = request.POST.get('amount')
+        receipt = request.POST.get('order_id')
+
+        if not amount or not receipt:
+            return JsonResponse(
+                {"bool": False, "message": "Amount and order_id are required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Prepare data for Razorpay order creation
+        data = {
+            "amount": int(amount),  # Convert amount to integer
+            "currency": "INR",
+            "receipt": receipt,
+        }
+
+        # Create Razorpay order
+        razorpay_order = client.order.create(data=data)
+
+        # Return success response
+        return JsonResponse(
+            {
+                "bool": True,
+                "message": "Razorpay order created successfully",
+                "data": {
+                    "id": razorpay_order.get("id"),
+                    "amount": razorpay_order.get("amount"),
+                    "currency": razorpay_order.get("currency"),
+                    "receipt": razorpay_order.get("receipt"),
+                    "status": razorpay_order.get("status"),
+                    "notes": razorpay_order.get("notes"),
+                    "created_at": razorpay_order.get("created_at"),
+                }
+            },
+            status=status.HTTP_201_CREATED
+        )
+    except Exception as e:
+        # Handle errors
+        return JsonResponse(
+            {"bool": False, "message": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
