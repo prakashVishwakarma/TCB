@@ -98,4 +98,4 @@ class PersonalizationAdmin(admin.ModelAdmin):
 
 @admin.register(CakeOrderHistory)
 class CakeOrderHistoryAdmin(admin.ModelAdmin):
-    list_display = ['id','user_model','category','cake_image','cake_flavour','sponge_type','finish_type','product_pescription','discount','name','price','weight','earliest_delivery','unique_quality','cake_message','quantity','ordered_on','order_id','status','shipping_address','payment_method']
+    list_display = ['id','user_model','category','cake_image','cake_flavour','sponge_type','finish_type','product_pescription','discount','name','price','weight','earliest_delivery','unique_quality','cake_message','quantity','ordered_on','order_id','status','shipping_address','payment_method','payment_id','razorpay_signature']

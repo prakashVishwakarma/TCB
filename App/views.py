@@ -13,10 +13,11 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 from rest_framework import status, viewsets
 from App.models import UserModel, ImageCarousel, Category, Cake, ClientsSayAboutUs, AddToCart, CakeFlavour, SpongeType, \
-    FinishType, Addresses, Personalization
+    FinishType, Addresses, Personalization, CakeOrderHistory, CakeImage, ProductDescription, CakeCareGuidelines, \
+    DeliverySpecifics, KindlyNote
 from App.serializers import GetUserSerializer, SignupSerializer, ImageCarouselSerializer, CreateCategorySerializer, \
     CategorySerializer, ContactNumberSerializer, CakeSerializer, ClientsSayAboutUsSerializer, AddToCartSerializer, \
-    AddressesSerializer, PersonalizationSerializer
+    AddressesSerializer, PersonalizationSerializer, CreateOrderHistorySerializer
 from rest_framework.authtoken.models import Token
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
@@ -723,8 +724,6 @@ class DeleteAddress(APIView):
 class AddPersonalization(APIView):
     def post(self, request, user_id):
         try:
-            # Log or print the data for debugging
-            print("####### add_delivery_date:", request.data.get("add_delivery_date"))
 
             # Validate serializer
             serializer = PersonalizationSerializer(data=request.data)
@@ -804,3 +803,74 @@ def create_razorpay_order(request):
             {"bool": False, "message": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+class CreateOrderHestory(APIView):
+    def post(self,request):
+        try:
+            serializer = CreateOrderHistorySerializer(data=request.data)
+
+            if not serializer.is_valid():
+                return api_response(status=status.HTTP_400_BAD_REQUEST, message="Invalid data", data=serializer.errors)
+
+            data = serializer.validated_data
+
+            # Step 2: Fetch related model instances
+            user_model = get_object_or_404(UserModel, id=request.data.get("user_model"))
+            category = get_object_or_404(Category, id=request.data.get("category"))
+            cake_image = get_object_or_404(CakeImage, id=request.data.get("cake_image"))
+            cake_flavour = get_object_or_404(CakeFlavour, id=request.data.get("cake_flavour"))
+            sponge_type = get_object_or_404(SpongeType, id=request.data.get("sponge_type"))
+            finish_type = get_object_or_404(FinishType, id=request.data.get("finish_type"))
+
+            # Fetch `ProductDescription` relationships
+            kindly_note = get_object_or_404(KindlyNote, id=request.data.get("kindly_note"))
+            delivery_specifics = get_object_or_404(DeliverySpecifics, id=request.data.get("delivery_specifics"))
+            cake_care_guidelines = get_object_or_404(CakeCareGuidelines, id=request.data.get("cake_care_guidelines"))
+
+            # Ensure ProductDescription exists
+            product_description = get_object_or_404(
+                ProductDescription,
+                kindly_note=kindly_note,
+                delivery_specifics=delivery_specifics,
+                cake_care_guidelines=cake_care_guidelines
+            )
+
+            # Step 3: Create the CakeOrderHistory object
+            cake_order = CakeOrderHistory.objects.create(
+                user_model_id=user_model.id,
+                category_id=category.id,
+                cake_image_id=cake_image.id,
+                cake_flavour_id=cake_flavour.id,
+                sponge_type_id=sponge_type.id,
+                finish_type_id=finish_type.id,
+                product_pescription_id=product_description.id,
+                discount=data['discount'],
+                name=data['name'],
+                price=data['price'],
+                weight=data['weight'],
+                earliest_delivery=data['earliest_delivery'],
+                unique_quality=data['unique_quality'],
+                cake_message=data['cake_message'],
+                quantity=data['quantity'],
+                ordered_on=data['ordered_on'],
+                order_id=data['order_id'],
+                payment_id=data.get('payment_id', "default_payment_id"),
+                razorpay_signature=data.get('razorpay_signature', "default_razorpay_signature"),
+                status=data['status'],
+                shipping_address=data['shipping_address'],
+                payment_method=data['payment_method']
+            )
+            return api_response(status=201, message=str("Cake order created successfully!"), data={"order_id": cake_order.id} )
+
+        except Exception as e:
+            logger.error(str(e))
+            return api_response(status=500, message=str(e), data={} )
+
+
+# class UpdateOrderStatus(APIView):
+#     def update(self,request,order_id):
+#         try:
+#             pass
+#         except Exception as e:
+#             logger.error(str(e))
+#             return api_response(status=500, message=str(e), data={} )
