@@ -866,11 +866,35 @@ class CreateOrderHestory(APIView):
             logger.error(str(e))
             return api_response(status=500, message=str(e), data={} )
 
+class UpdateOrderStatus(APIView):
+    def patch(self, request ,order_id):
+        try:
+            print(order_id)
+            # Define the required and allowed keys
+            allowed_keys = {'razorpay_signature', 'razorpay_order_id', 'razorpay_payment_id'}
 
-# class UpdateOrderStatus(APIView):
-#     def update(self,request,order_id):
-#         try:
-#             pass
-#         except Exception as e:
-#             logger.error(str(e))
-#             return api_response(status=500, message=str(e), data={} )
+            # Extract the keys from the request data
+            received_keys = set(request.data.keys())
+
+            # Check for extra keys
+            extra_keys = received_keys - allowed_keys
+            if extra_keys:
+                return api_response(status=400, message=str(f"Invalid keys provided: {', '.join(extra_keys)}"), data={})
+
+            # Check if any required keys are missing
+            missing_keys = allowed_keys - received_keys
+            if missing_keys:
+                return api_response(status=400, message=str( f"Missing required keys: {', '.join(missing_keys)}"), data={})
+
+            cake_order_history = CakeOrderHistory.objects.get(id=order_id)
+            cake_order_history.order_id = request.data.get('razorpay_order_id')
+            cake_order_history.payment_id = request.data.get('razorpay_payment_id')
+            cake_order_history.razorpay_signature = request.data.get('razorpay_signature')
+
+            cake_order_history.save()
+
+            return api_response(status=200, message=str("Updated successfully"), data={})
+
+        except Exception as e:
+            logger.error(str(e))
+            return api_response(status=500, message=str(e), data={} )

@@ -22,7 +22,7 @@ from App.views import GetAllUsers, SignupView, ImageCarouselViewSet, ImageCarous
     LogoutView, GetCakesByCategory, CreateCakeView, GetAllCakes, PostClientsSayAboutUs, GetAllClientsSayAboutUs, \
     DeleteClientsSayAboutUsById, UpdateClientsSayAboutUs, PostAddToCart, GetAddToCartByUser, DeleteAddToCartById, \
     QuantityHandler, CreateAddress, GetAddress, UpdateAddress, DeleteAddress, AddPersonalization, create_razorpay_order, \
-    CreateOrderHestory
+    CreateOrderHestory, UpdateOrderStatus
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -58,4 +58,5 @@ urlpatterns = [
     path('add-persionalization/<int:user_id>/', AddPersonalization.as_view(), name='AddPersonalization'),
     path('create-razorpay-order/', create_razorpay_order, name='create-razorpay-order'),
     path('create-order-history/', CreateOrderHestory.as_view(), name='create-order-history'),
+    path('update-order-history/<int:order_id>/', UpdateOrderStatus.as_view(), name='update-order-history'),
 ]
