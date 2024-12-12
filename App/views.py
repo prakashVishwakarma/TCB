@@ -1,12 +1,5 @@
-import json
-import random
-from functools import partial
-from symtable import Class
-
 import razorpay
 from django.contrib.auth import authenticate
-from django.core import cache
-from django.core.serializers import serialize
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
@@ -898,3 +891,25 @@ class UpdateOrderStatus(APIView):
         except Exception as e:
             logger.error(str(e))
             return api_response(status=500, message=str(e), data={} )
+
+class GetAllOrderHistory(APIView):
+    def get(self, request):
+        try:
+            cake_order_historys= CakeOrderHistory.objects.all()
+            serializer = CreateOrderHistorySerializer(cake_order_historys, many=True)
+            return api_response(status=200, message=("getting all order history successfully"), data=serializer.data)
+
+        except Exception as e:
+            logger.error("Prakash Vishwakarma",e)
+            return api_response(status=500, message=(str(e)), data={})
+
+class GetOrderHistoryById(APIView):
+    def get(self, request, order_id):
+        try:
+            cake_order_history = CakeOrderHistory.objects.get(id=order_id)
+            serializer = CreateOrderHistorySerializer(cake_order_history)
+            return api_response(status=200, message=("getting history by id successfully"), data=serializer.data)
+
+        except Exception as e:
+            logger.error("Prakash Vishwakarma", e)
+            return api_response(status=500, message=(str(e)), data={})
