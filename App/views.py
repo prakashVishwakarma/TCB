@@ -476,6 +476,7 @@ class PostAddToCart(APIView):
     def post(self, request, *args, **kwargs):
         data = request.data
         try:
+            # token = Token.objects.get(key=request.headers.get('Authorization').split()[1])
             # Validate user_model
             user_model = UserModel.objects.get(id=data.get('user_model'))
 
